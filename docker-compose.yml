@@ -1,0 +1,28 @@
+version: "3"
+services: 
+    mysql:
+        image: mysql:5.7
+        environment:
+            MYSQL_DATABASE: trixcms
+            MYSQL_USER: user
+            MYSQL_PASSWORD: user
+            MYSQL_ROOT_PASSWORD: root
+        volumes: 
+            - ./mysql_persist:/var/lib/mysql
+    proxy:
+        image: jwilder/nginx-proxy:latest
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+        ports:
+            - "8080:80"
+    www:
+        build: trixcms
+        image: trixcms:latest
+        volumes:
+            - ./trixcms/www:/var/www/html
+            - /etc/localtime:/etc/localtime:ro
+        links:
+            - mysql:mysql
+        environment: 
+            - VIRTUAL_HOST=trixcms.hydra.ovh
+            - APACHE_DOCUMENT_ROOT=/var/www/html
